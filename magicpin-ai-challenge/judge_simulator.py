@@ -40,13 +40,13 @@ except ImportError:
 BOT_URL = os.getenv("BOT_URL", "http://localhost:8080")
 
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openrouter")
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")
 
 # Your API key — loaded from .env (OPENROUTER_API_KEY)
-LLM_API_KEY = os.getenv("OPENROUTER_API_KEY")
+LLM_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Model to use — using Nemotron 3 Super for high-quality judging
-LLM_MODEL = os.getenv("LLM_MODEL", "openrouter/auto")
+LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.1-70b-versatile")
 
 # For Ollama only: local server URL
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
