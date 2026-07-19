@@ -1,0 +1,9 @@
+name: Render keep-alive
+on:
+  schedule:
+    - cron: "*/12 * * * *"
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -sf https://vera-magicpin-merchant-ai-assistant.onrender.com/v1/healthz

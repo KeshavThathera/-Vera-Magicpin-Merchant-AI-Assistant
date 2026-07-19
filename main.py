@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -29,9 +30,139 @@ START = time.time()
 scheduler = AsyncIOScheduler()
 last_keep_alive = time.time()
 
-@app.get("/")
+DASHBOARD_ENDPOINTS = [
+    ("GET",  "/v1/healthz", "Liveness probe — service status + live context counts"),
+    ("GET",  "/v1/metadata", "Team, model, and approach metadata for the judge harness"),
+    ("POST", "/v1/context", "Ingest category / merchant / trigger / customer context"),
+    ("POST", "/v1/tick", "Score triggers, plan, and compose the outbound WhatsApp message"),
+    ("POST", "/v1/reply", "Classify a merchant reply and compose the next turn"),
+    ("POST", "/v1/teardown", "Wipe all in-memory state at the end of a test session"),
+]
+
+# Fill these in yourself after running judge_simulator.py / your own test suite,
+# or set SHOW_CHALLENGE_SNAPSHOT = False to hide this section entirely.
+SHOW_CHALLENGE_SNAPSHOT = False
+CHALLENGE_SNAPSHOT = {
+    "overall": "—", "overall_pct": "—", "penalties": "—",
+    "category_fit": "—", "engagement": "—", "pairs_evaluated": "—",
+}
+
+
+def _method_badge(method: str) -> str:
+    color = "#2ecc71" if method == "GET" else "#e0a72e"
+    return f'<span style="display:inline-block;min-width:44px;padding:2px 8px;border-radius:5px;background:{color}22;color:{color};font-weight:700;font-size:12px;letter-spacing:.03em;">{method}</span>'
+
+
+def _fmt_uptime(seconds: float) -> str:
+    seconds = int(seconds)
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    if h:
+        return f"{h}h {m}m"
+    if m:
+        return f"{m}m {s}s"
+    return f"{s}s"
+
+
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"message": "Vera Merchant AI Assistant v11 by Keshav Thathera", "docs": "/docs"}
+    uptime = _fmt_uptime(time.time() - START)
+    llm_enabled = any([OPENROUTER_KEY, GROQ_KEY, MISTRAL_KEY, OPENAI_KEY])
+    contexts_loaded = len(contexts)
+    active_conversations = len(conversations)
+
+    rows_html = "\n".join(
+        f'<tr><td>{_method_badge(m)}</td><td class="path">{p}</td><td class="desc">{d}</td></tr>'
+        for m, p, d in DASHBOARD_ENDPOINTS
+    )
+
+    snapshot_html = ""
+    if SHOW_CHALLENGE_SNAPSHOT:
+        snapshot_html = f"""
+        <div class="section-label">LAST CHALLENGE RESULT</div>
+        <div class="stat-row">
+          <div class="stat highlight"><div class="stat-value">{CHALLENGE_SNAPSHOT['overall']} <span class="stat-sub">/ 50</span></div><div class="stat-label">Overall score ({CHALLENGE_SNAPSHOT['overall_pct']}%)</div></div>
+          <div class="stat"><div class="stat-value">{CHALLENGE_SNAPSHOT['penalties']}</div><div class="stat-label">Penalties applied</div></div>
+          <div class="stat"><div class="stat-value">{CHALLENGE_SNAPSHOT['category_fit']}</div><div class="stat-label">Category fit</div></div>
+          <div class="stat"><div class="stat-value">{CHALLENGE_SNAPSHOT['engagement']}</div><div class="stat-label">Engagement</div></div>
+          <div class="stat"><div class="stat-value">{CHALLENGE_SNAPSHOT['pairs_evaluated']}</div><div class="stat-label">Test pairs evaluated</div></div>
+        </div>
+        <div class="footnote">Snapshot — not recomputed live.</div>
+        """
+
+    html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"/><title>Vera — magicpin Merchant AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+  :root {{ color-scheme: dark; }}
+  * {{ box-sizing: border-box; }}
+  body {{
+    margin: 0; padding: 40px 24px; background: #0a0f0d;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e8ece9;
+  }}
+  .wrap {{ max-width: 900px; margin: 0 auto; }}
+  .header {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }}
+  .header-left {{ display: flex; align-items: center; gap: 14px; }}
+  .logo {{
+    width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-weight: 800; font-size: 20px; color: #0a0f0d;
+    background: linear-gradient(135deg, #7de89a, #2ecc71);
+  }}
+  h1 {{ margin: 0; font-size: 19px; }}
+  .subtitle {{ margin: 2px 0 0; font-size: 13px; color: #8a9a92; }}
+  .status-pill {{
+    display: flex; align-items: center; gap: 7px; background: #11241a; border: 1px solid #1f3d2c;
+    color: #4ee08a; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  }}
+  .dot {{ width: 8px; height: 8px; border-radius: 50%; background: #4ee08a; box-shadow: 0 0 8px #4ee08a; }}
+  .section-label {{ font-size: 12px; letter-spacing: .08em; color: #7a8a82; margin: 30px 0 12px; font-weight: 700; }}
+  .stat-row {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 12px; }}
+  .stat {{ background: #101915; border: 1px solid #1c2b22; border-radius: 10px; padding: 16px 18px; }}
+  .stat.highlight {{ border-color: #2ecc7155; }}
+  .stat-value {{ font-size: 26px; font-weight: 800; }}
+  .stat.highlight .stat-value {{ color: #4ee08a; }}
+  .stat-sub {{ font-size: 14px; font-weight: 500; color: #7a8a82; }}
+  .stat-label {{ font-size: 12px; color: #8a9a92; margin-top: 4px; }}
+  .footnote {{ font-size: 12px; color: #5c6d64; margin-top: 10px; }}
+  table {{ width: 100%; border-collapse: collapse; margin-top: 8px; }}
+  td {{ padding: 12px 10px; border-bottom: 1px solid #182620; font-size: 13px; vertical-align: middle; }}
+  td.path {{ font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #cfe8d8; }}
+  td.desc {{ color: #8a9a92; }}
+  tr:last-child td {{ border-bottom: none; }}
+  a.doclink {{ color: #4ee08a; text-decoration: none; font-size: 13px; }}
+  a.doclink:hover {{ text-decoration: underline; }}
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">V</div>
+        <div>
+          <h1>Vera — magicpin Merchant AI</h1>
+          <p class="subtitle">Stateful, proactive WhatsApp engagement engine for merchants</p>
+        </div>
+      </div>
+      <div class="status-pill"><span class="dot"></span>Online</div>
+    </div>
+
+    <div class="section-label">SERVICE</div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-value">{uptime}</div><div class="stat-label">Uptime</div></div>
+      <div class="stat"><div class="stat-value">{"Enabled" if llm_enabled else "Disabled"}</div><div class="stat-label">LLM features</div></div>
+      <div class="stat"><div class="stat-value">{contexts_loaded}</div><div class="stat-label">Contexts loaded</div></div>
+      <div class="stat"><div class="stat-value">{active_conversations}</div><div class="stat-label">Active conversations</div></div>
+    </div>
+
+    {snapshot_html}
+
+    <div class="section-label">API ENDPOINTS</div>
+    <table><tbody>{rows_html}</tbody></table>
+
+    <p style="margin-top:28px;"><a class="doclink" href="/docs">→ Open interactive API docs (/docs)</a></p>
+  </div>
+</body></html>"""
+    return HTMLResponse(content=html)
 
 @app.get("/keep-alive")
 async def keep_alive():
@@ -1787,11 +1918,11 @@ async def healthz():
 @app.get("/v1/metadata")
 async def metadata():
     return {
-        "team_name": "Keshav Thathera",
-        "team_members": ["Keshav Thathera"],
+        "team_name": "Chaitanya Kalra",
+        "team_members": ["Chaitanya Kalra"],
         "model": "via OpenRouter, Groq , OpenAI & MistralAi",
         "approach": "rules-first deterministic planner + category-voice injection + grounded fallbacks + intent state machine",
-        "contact_email": "Keshavthathera2@gmail.com",
+        "contact_email": "chaitanyakalra7@gmail.com",
         "version": "11.0.1",
         "submitted_at": datetime.now(timezone.utc).isoformat()
     }
