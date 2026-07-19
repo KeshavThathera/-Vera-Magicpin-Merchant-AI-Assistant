@@ -46,7 +46,7 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")
 LLM_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Model to use — using Nemotron 3 Super for high-quality judging
-LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.1-70b-versatile")
+LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
 
 # For Ollama only: local server URL
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
@@ -287,9 +287,16 @@ class GroqProvider(LLMProvider):
             "https://api.groq.com/openai/v1/chat/completions",
             data=json.dumps({"model": self.model, "messages": messages,
                             "temperature": 0.2, "max_tokens": 1500}).encode("utf-8"),
-            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
+                     "User-Agent": "vera-judge-simulator/1.0"}
         )
-        resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
+        try:
+            resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
+        except urlerror.HTTPError as e:
+            print("Status:", e.code)
+            print("Headers:", e.headers)
+            print(e.read().decode("utf-8", errors="ignore"))
+            raise
         data = json.loads(resp.read().decode("utf-8"))
         return data["choices"][0]["message"]["content"]
 
