@@ -5,7 +5,8 @@ import httpx
 import json
 import asyncio
 
-BOT_URL = "https://kkalra-vera-magicpin.hf.space"
+import os
+BOT_URL = os.getenv("BOT_URL", "https://vera-magicpin-merchant-ai-assistant.onrender.com")
 LOCAL_BOT = "http://localhost:8080"
 
 

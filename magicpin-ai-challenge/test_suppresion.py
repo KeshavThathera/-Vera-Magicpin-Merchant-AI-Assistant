@@ -1,7 +1,8 @@
 import json, time
 from urllib import request as urlrequest
 
-BOT_URL = "https://kkalra-vera-magicpin.hf.space"
+import os
+BOT_URL = os.getenv("BOT_URL", "https://vera-magicpin-merchant-ai-assistant.onrender.com")
 
 def post(path, body):
     req = urlrequest.Request(f"{BOT_URL}{path}", data=json.dumps(body).encode(), 

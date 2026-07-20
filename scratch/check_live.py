@@ -3,8 +3,8 @@ import json
 import sys
 
 URLS = [
-    "https://kkalra-vera-magicpin.hf.space/v1/healthz",
-    "https://kkalra-vera-magicpin.hf.space/v1/metadata"
+   "https://vera-magicpin-merchant-ai-assistant.onrender.com/v1/healthz",
+"https://vera-magicpin-merchant-ai-assistant.onrender.com/v1/metadata"
 ]
 
 for url in URLS:

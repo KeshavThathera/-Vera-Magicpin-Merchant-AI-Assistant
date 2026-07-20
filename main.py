@@ -181,7 +181,8 @@ async def scheduled_keep_alive():
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             # Ping local loopback to bypass HuggingFace's public rate limiter (429s)
-            response = await client.get("http://127.0.0.1:7860/v1/healthz")
+            port = os.getenv("PORT", "7860")
+            response = await client.get("http://127.0.0.1:{port}/v1/healthz")
             logger.info(f"Keep-alive /v1/healthz: {response.status_code}")
     except Exception as e:
         logger.warning(f"Keep-alive ping failed: {e}")  # silent — don't crash scheduler
@@ -1918,11 +1919,11 @@ async def healthz():
 @app.get("/v1/metadata")
 async def metadata():
     return {
-        "team_name": "Chaitanya Kalra",
-        "team_members": ["Chaitanya Kalra"],
+        "team_name": "Keshav Thathera",
+        "team_members": ["Keshav Thathera"],
         "model": "via OpenRouter, Groq , OpenAI & MistralAi",
         "approach": "rules-first deterministic planner + category-voice injection + grounded fallbacks + intent state machine",
-        "contact_email": "chaitanyakalra7@gmail.com",
+        "contact_email": "Keshavthathera2@gmail.com",
         "version": "11.0.1",
         "submitted_at": datetime.now(timezone.utc).isoformat()
     }

@@ -16,7 +16,8 @@ except ImportError:
     print("❌ Missing 'requests' library. Install: pip install requests")
     sys.exit(1)
 
-BOT_URL = "https://kkalra-vera-magicpin.hf.space"
+import os
+BOT_URL = os.getenv("BOT_URL", "https://vera-magicpin-merchant-ai-assistant.onrender.com")
 
 # Case-study inputs + expected outputs
 CASES = [

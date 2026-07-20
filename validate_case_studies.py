@@ -405,7 +405,7 @@ def main():
     parser = argparse.ArgumentParser(description="Validate Vera bot against case studies")
     parser.add_argument(
         "--bot-url",
-        default="https://kkalra-vera-magicpin.hf.space",
+        default="https://vera-magicpin-merchant-ai-assistant.onrender.com",
         help="Bot endpoint URL"
     )
     parser.add_argument(

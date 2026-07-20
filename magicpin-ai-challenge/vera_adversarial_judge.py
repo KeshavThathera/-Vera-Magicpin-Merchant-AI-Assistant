@@ -34,7 +34,7 @@ except ImportError:
 # =============================================================================
 
 # BOT_URL = os.getenv("BOT_URL", "http://localhost:8080")
-BOT_URL = os.getenv("BOT_URL", "https://kkalra-vera-magicpin.hf.space")
+BOT_URL = os.getenv("BOT_URL", "https://vera-magicpin-merchant-ai-assistant.onrender.com")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openrouter")
 LLM_API_KEY = os.getenv("OPENROUTER_API_KEY")
 LLM_MODEL = os.getenv("LLM_MODEL", "openrouter/auto")

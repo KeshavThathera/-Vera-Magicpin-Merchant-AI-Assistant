@@ -2,7 +2,7 @@
 
 ## COMPLETED: Comprehensive Technical Methodology Document Created
 
-**File Location**: `C:\Users\Chaitanya.Kalra\github\vera-magicpin\vera_methodology_cto_new.md`
+**File Location**: `C:\Users\Keshav\github\vera-magicpin\vera_methodology_cto_new.md`
 
 **Status**: ✅ **COMPREHENSIVE 550-LINE TECHNICAL DOCUMENTATION COMPLETED**
 
@@ -15,7 +15,6 @@ A complete, production-ready technical methodology document that explains the en
 ### Document Structure (11 Major Sections)
 
 1. **EXECUTIVE SUMMARY** — 3-line overview of what/how/why
-   
 2. **SECTION 1: THE 4-CONTEXT COMPOSITION ENGINE (Lines 350-452)**
    - 4-layer table: Category, Merchant, Trigger, Customer
    - Critical line 431: `"_raw_digest": digest` requirement
@@ -95,12 +94,14 @@ A complete, production-ready technical methodology document that explains the en
 The document covers **everything a CTO would ask**:
 
 ✅ **Architecture & Design**
+
 - How the 4-context engine works
 - Why deterministic planning before LLM (prevents hallucination)
 - How the LLM ladder ensures 100% uptime
 - In-memory state design and why it's acceptable
 
 ✅ **Implementation Details**
+
 - All 19 trigger kinds with specific anchor facts and decision statements
 - Universal payload scan mechanism for unknown trigger kinds
 - Message composition flow with 3-part mandatory structure
@@ -109,6 +110,7 @@ The document covers **everything a CTO would ask**:
 - Grounded fallback (deterministic, never generic, uses real facts)
 
 ✅ **Critical Parameters**
+
 - temperature: 0 (determinism requirement)
 - max_tokens: 180 (speed requirement)
 - Timeouts: 2.2s for Groq, 3.0s for OpenRouter
@@ -116,6 +118,7 @@ The document covers **everything a CTO would ask**:
 - LLM ladder order: Groq → OpenRouter → Groq → OpenRouter (never consecutive same-provider)
 
 ✅ **API Contracts**
+
 - All 5 endpoints with request/response schemas
 - Idempotency guarantees via (scope, version) key
 - Suppression dedup mechanism
@@ -123,12 +126,14 @@ The document covers **everything a CTO would ask**:
 - Rate limit handling strategy
 
 ✅ **Known Issues & Fixes**
+
 - All 8 critical bugs identified with line numbers
 - Root causes explained
 - Specific fixes documented
 - Why they matter (score impact)
 
 ✅ **Deployment & Operations**
+
 - 30-item pre-launch checklist
 - Health check keep-alive strategy
 - State persistence across restarts
@@ -140,15 +145,18 @@ The document covers **everything a CTO would ask**:
 ## How to Use
 
 **Option A: Manual File Replacement**
+
 1. Delete the old `vera_methodology_cto.md` (if needed)
 2. Rename `vera_methodology_cto_new.md` → `vera_methodology_cto.md`
 
 **Option B: Programmatic Replacement**
+
 ```bash
 cp vera_methodology_cto_new.md vera_methodology_cto.md
 ```
 
 **Option C: Git-based Replacement**
+
 ```bash
 git rm vera_methodology_cto.md
 git add vera_methodology_cto_new.md
@@ -188,6 +196,6 @@ This document provides everything needed to brief the Magicpin CTO on:
 ---
 
 **Document Status**: ✅ **PRODUCTION-READY**  
-**File Path**: `C:\Users\Chaitanya.Kalra\github\vera-magicpin\vera_methodology_cto_new.md`  
+**File Path**: `C:\Users\Keshav\github\vera-magicpin\vera_methodology_cto_new.md`  
 **Lines**: 550 (vs. 65 original template)  
 **Coverage**: Complete technical methodology, line-by-line referenced to main.py

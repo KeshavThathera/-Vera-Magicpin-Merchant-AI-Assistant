@@ -36,7 +36,7 @@ except ImportError:
 # =============================================================================
 
 # Your bot's URL (where your bot is running)
-# BOT_URL = os.getenv("BOT_URL", "https://kkalra-vera-magicpin.hf.space")
+BOT_URL = os.getenv("BOT_URL", "https://vera-magicpin-merchant-ai-assistant.onrender.com")
 BOT_URL = os.getenv("BOT_URL", "http://localhost:8080")
 
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"

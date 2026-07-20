@@ -19,7 +19,8 @@ from pathlib import Path
 from typing import Optional
 from datetime import datetime, timezone
 
-BOT_URL = "https://kkalra-vera-magicpin.hf.space"
+import os
+BOT_URL = os.getenv("BOT_URL", "https://vera-magicpin-merchant-ai-assistant.onrender.com")
 DATASET_ROOT = Path("magicpin-ai-challenge/dataset")
 EXPANDED_ROOT = Path("magicpin-ai-challenge/expanded")
 
